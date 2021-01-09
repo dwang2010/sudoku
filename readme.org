@@ -1,0 +1,25 @@
+* small project idea!
+  sudoku
+  - object oriented
+  - screen rendering
+  - do it all in python3
+
+* game details
+  sudoku you have a board
+  board is a 9x9 grid
+  each "cell" of the grid can hold a number 1-9
+  there are "regions" holding cells, that can be rows, columns or 3x3 blocks
+  each section can only have unique values from 1-9 (no repeats)
+
+** actions a player can take
+   - add numbers
+   - remove numbers
+   - check if board state is valid
+
+** setup actions
+   - load board from file
+
+* files
+  sudoku.py         : main file for running the game
+  sudoku_classes.py : back-end related classes
+  sudoku_draw.py    : rendering related classes
