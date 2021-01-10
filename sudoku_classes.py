@@ -31,13 +31,13 @@ class Region:
         self.cells.append(c)
 
     # check that region only holds unique values
-    def validate(self) -> bool:
+    def validate(self) -> Tuple[bool, int]:
         res, s = 0, set()
         for cell in self.cells:
             if cell.val > 0:
                 res += 1
                 s.add(cell.val)
-        return res == len(s)
+        return (res == len(s), len(s))
 
 # holds all the cells / regions
 class Board:
@@ -62,11 +62,26 @@ class Board:
                 self.b_reg[blk_ind].add_cell(self.g[r][c]) # blk
 
     # check all board regions for sudoku 1-9 uniqueness
-    def chk_board(self) -> bool:
-        if not all(r.validate() for r in self.r_reg): return False
-        if not all(c.validate() for c in self.c_reg): return False
-        if not all(b.validate() for b in self.b_reg): return False
-        return True
+    def chk_board(self) -> Tuple[bool, bool]:
+        r_nums = 0
+        for r in self.r_reg:
+            uniq, nums = r.validate()
+            if not uniq: return (False, False)
+            r_nums += nums
+
+        c_nums = 0
+        for c in self.c_reg:
+            uniq, nums = c.validate()
+            if not uniq: return (False, False)
+            c_nums += nums
+
+        b_nums = 0
+        for b in self.b_reg:
+            uniq, nums = b.validate()
+            if not uniq: return (False, False)
+            b_nums += nums
+
+        return (True, r_nums + c_nums + b_nums == 243)
 
     # load in board configuration
     # TBD: make this load from file?
