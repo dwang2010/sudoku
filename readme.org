@@ -11,13 +11,9 @@
   there are "regions" holding cells, that can be rows, columns or 3x3 blocks
   each section can only have unique values from 1-9 (no repeats)
 
-** actions a player can take
+** primary player actions
    - add numbers
    - remove numbers
-   - check if board state is valid
-
-** TODO setup actions
-   - load board from file
 
 ** user interface
    left mouse click
@@ -30,11 +26,13 @@
    value 0 shows up as light grey
    locked numbers from pre-configured board show up in red, can't be selected
 
-   "h" toggles hint printout (immediate check on board validity)
+   message box at bottom of window
+   - indicates game completion at end
+   - "h" toggles hint printout (immediate check on board validity)
 
 ** TODO user interface
+   "m" for manual board setup
    "s" to auto-solve the puzzle
-   fancy animation on completing normally
 
 * files
   sudoku.py         : main file for running the game
