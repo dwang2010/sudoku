@@ -1,24 +1,23 @@
-from typing import List
+from typing import List, Tuple
 
 # single square on board that can hold value from 1-9
 class Cell:
-    def __init__(self, i: int, j: int, val: int=0, fix: bool=False):
+    def __init__(self, i: int, j: int, val: int=0, lock: bool=False):
+        self.pos = (i, j)
         self.val = val
-        self.pos = (i,j)
-        self.fix = fix
+        self.lock = lock
 
-    # check if input value legal, if so set
-    def set_val(self, val: int, fix: bool=False) -> bool:
-        if val > 0:
-            self.val = val
-            self.fix = fix
-            return True
-        return False
+    def set_val(self, val: int) -> None:
+        self.val = val
 
-    # clear cell value back to 0
-    def clear_val(self) -> None:
-        if not self.fix:
-            self.val = 0
+    def set_lock(self, lock: bool) -> None:
+        self.lock = lock
+
+    def get_val(self) -> int:
+        return self.val
+
+    def get_lock(self) -> bool:
+        return self.lock
 
 # group of nine cells on the board
 # no need to separate per row / column / block
@@ -62,27 +61,27 @@ class Board:
                 blk_ind = 3*(r//3) + c//3
                 self.b_reg[blk_ind].add_cell(self.g[r][c]) # blk
 
-    # check that all regions have legal number assignment
-    def chk_valid(self) -> bool:
+    # check all board regions for sudoku 1-9 uniqueness
+    def chk_board(self) -> bool:
         if not all(r.validate() for r in self.r_reg): return False
         if not all(c.validate() for c in self.c_reg): return False
         if not all(b.validate() for b in self.b_reg): return False
         return True
 
-    # load in board configuration, 0 denoting unfilled
-    # otherwise, if value present, also configure cell as "fixed"
-    # TBD: make this load from file
-    def load(self, grid: List[List[int]]) -> bool:
+    # load in board configuration
+    # TBD: make this load from file?
+    def load_board(self, grid: List[List[int]]) -> bool:
         rows, cols = len(grid), len(grid[0])
         if rows != 9 and cols != 9: return False
 
         for r in range(rows):
             for c in range(cols):
-                fix = True if grid[r][c] else False
-                self.g[r][c].set_val( grid[r][c], fix )
+                lock = True if grid[r][c] else False
+                self.g[r][c].set_val(grid[r][c])
+                self.g[r][c].set_lock(lock)
         return True
 
-    # debug: return current board
+    # return current board state
     def _print_board(self) -> None:
         rows, cols = 9, 9
         self.test = [[None for _ in range(rows)] for __ in range(cols)]
@@ -93,3 +92,12 @@ class Board:
 
         for r in range(rows):
             print (self.test[r])
+
+    # return board cell
+    def get_cell(self, i: int, j: int) -> Cell:
+        return self.g[i][j]
+
+    # update board cell with new value
+    def update_cell(self, i: int, j: int, val: int) -> Cell:
+        self.g[i][j].set_val(val)
+        return self.g[i][j]

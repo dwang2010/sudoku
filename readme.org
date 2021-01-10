@@ -16,8 +16,25 @@
    - remove numbers
    - check if board state is valid
 
-** setup actions
+** TODO setup actions
    - load board from file
+
+** user interface
+   left mouse click
+   0-9 digit input
+
+   tiles change color when selected by mouse
+   tiles revert to base color following number entry, or new tile selection
+
+   values 1-9 show up in black
+   value 0 shows up as light grey
+   locked numbers from pre-configured board show up in red, can't be selected
+
+   "h" toggles hint printout (immediate check on board validity)
+
+** TODO user interface
+   "s" to auto-solve the puzzle
+   fancy animation on completing normally
 
 * files
   sudoku.py         : main file for running the game

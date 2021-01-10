@@ -1,13 +1,69 @@
 import pygame as pg
+from typing import Tuple
+import sudoku_classes as sc
 
-# sudoku board rendering class
-class Grid:
+# class for rendering individual sudoku tiles
+class Tile:
+    black = pg.Color(0,0,0)
+    white = pg.Color(255,255,255)
+    beige = pg.Color(240,225,190)
+    grey = pg.Color(211,211,211)
+    red = pg.Color(220,20,60)
+
+    # create a square, selectable tile for showing current cell number
+    def __init__(self, i: int, j: int, x: int, y: int, side: int,
+                 bg: pg.Surface, font: pg.font, cell: sc.Cell):
+        # pos    : (i,j) mapping to board cell object
+        # coords : (x,y) coordinates for top left corner
+        # img    : tile image surface
+        # rect   : coordinate rectangle
+        self.pos = (i, j)
+        self.coords = (x, y)
+        self.img = pg.Surface((side, side))
+        self.rect = self.img.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.font = font
+        self.bg = bg
+        self.cell = cell
+        self.update(False)
+
+    # check if selected point coordinate hits tile, and tile cell not locked
+    def chk_slctd(self, x: int, y: int) -> bool:
+        lock = self.cell.get_lock()
+        if lock: return False
+        return self.rect.collidepoint(x,y)
+
+    # update and render new tile image
+    def update(self, slct: bool) -> None:
+        val = self.cell.get_val()
+        lock = self.cell.get_lock()
+
+        # configure box / text color
+        bclr = self.beige if slct else self.white
+        if lock:
+            tclr = self.red
+        else:
+            tclr = self.grey if val == 0 else self.black
+
+        # render text and get coords to center in tile
+        txt = self.font.render(str(val), True, tclr)
+        txt_rect, img_rect = txt.get_rect(), self.img.get_rect()
+        txt_x = img_rect.width / 2 - txt_rect.width / 2
+        txt_y = img_rect.height / 2 - txt_rect.height / 2
+
+        # blit text render onto tile; blit tile onto background
+        self.img.fill(bclr)
+        self.img.blit(txt, (txt_x, txt_y))
+        self.bg.blit(self.img, self.coords)
+
+# collection of sudoku tiles for rendering
+class Render:
     N = 9 # grid of NxN boxes
 
-    def __init__(self, width: int, surf: pg.Surface):
-        # rects: grid of selectable rectangles
-        # last: last selected rectangle
-        self.rects = [[None for _ in range(self.N)] for __ in range(self.N)]
+    def __init__(self, width: int, bg: pg.Surface, font: pg.font, board: sc.Board):
+        # tiles: grid of selectable cells (rect + surface)
+        # last: last selected tile
+        self.tiles = [[None for _ in range(self.N)] for __ in range(self.N)]
         self.last = None
 
         lines = 10      # grid lines in between / on outside
@@ -17,38 +73,33 @@ class Grid:
         # draw grid lines
         for i in range(lines):
             x, y = i*step, i*step
-            pg.draw.line(surf, l_clr, (0,y), (width,y), l_width) # horiz
-            pg.draw.line(surf, l_clr, (x,0), (x,width), l_width) # vert
+            l_width = 4 if i in [3,6] else 2
+            pg.draw.line(bg, l_clr, (0,y), (width,y), l_width) # horiz
+            pg.draw.line(bg, l_clr, (x,0), (x,width), l_width) # vert
 
-        b_clr = (255,255,255) # box color
         b_brdr = step // 20   # box border thickness
         x, y = 0, 0
-        # draw cell rectangles, store in self.rects
+        # create grid of Tile, store in self.tiles
         for i in range(self.N):
             for j in range(self.N):
-                x, y = i*step, j*step
-                r = pg.Rect(x+b_brdr+l_width, y+b_brdr+l_width,
-                            step-(2*b_brdr+l_width), step-(2*b_brdr+l_width))
-                pg.draw.rect(surf, b_clr, r)
-                self.rects[i][j] = r
+                x, y = j*step, i*step
+                rx = x + b_brdr + l_width
+                ry = y + b_brdr + l_width
+                rside = step - (2 * b_brdr + l_width)
+                cell = board.get_cell(i, j)
+                self.tiles[i][j] = Tile(i, j, rx, ry, rside, bg, font, cell)
 
-    # check if coords fall within a pre-defined rectangle
-    # if so, select the box (highlight) and deselect last
-    def chk_coords(self, surf: pg.Surface, x: int, y: int) -> None:
+    # highlight tile if coords fall within a pre-defined rect region
+    def chk_coords(self, bg: pg.Surface, x: int, y: int) -> Tuple[int,int]:
         for i in range(self.N):
             for j in range(self.N):
-                if self.rects[i][j].collidepoint(x,y):
-                    if self.last:
-                        self.dslct_box(surf, self.last)
-                    self.slct_box(surf, self.rects[i][j])
-                    self.last = self.rects[i][j]
-                    return
+                if self.tiles[i][j].chk_slctd(x,y):
+                    if self.last: self.last.update(False)
+                    self.tiles[i][j].update(True)
+                    self.last = self.tiles[i][j]
+                    return (i, j)
+        return (-1, -1)
 
-    # highlight grid cell when selected
-    def slct_box(self, surf: pg.Surface, r: pg.Rect) -> None:
-        slct_clr = (240,225,190)
-        pg.draw.rect(surf, slct_clr, r)
-
-    def dslct_box(self, surf: pg.Surface, r: pg.Rect) -> None:
-        dslct_clr = (255,255,255)
-        pg.draw.rect(surf, dslct_clr, r)
+    # re-render specified tile
+    def update_tile(self, i: int, j: int) -> None:
+        self.tiles[i][j].update(False)
