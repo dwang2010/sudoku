@@ -99,11 +99,17 @@ class Render:
     def update_tile(self, i: int, j: int) -> None:
         self.tiles[i][j].update(False)
 
+    # re-render all tiles
+    def update_all(self) -> None:
+        for i in range(self.N):
+            for j in range(self.N):
+                self.update_tile(i, j)
+
 # class for display box containing messages for the player
 class Msgbox:
     def __init__(self, x: int, y: int, width: int, height: int,
                  bg: pg.Surface, font: pg.font):
-        self.s = "Welcome to Sudoku! Press 'h' for active hints as you play."
+        self.s = "Press 'h' for active hints or 'm' for manual board config"
         self.coords = (x, y)
         self.img = pg.Surface((width, height))
         self.rect = self.img.get_rect()

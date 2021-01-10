@@ -41,8 +41,10 @@ class Region:
 
 # holds all the cells / regions
 class Board:
+    N = 9 # grid of NxN cells
+
     def __init__(self):
-        rows, cols, blks = 9, 9, 9
+        rows, cols, blks = self.N, self.N, self.N
 
         # init grid of cells
         self.g = [[Cell(r,c) for c in range(cols)] for r in range(rows)]
@@ -87,7 +89,7 @@ class Board:
     # TBD: make this load from file?
     def load_board(self, grid: List[List[int]]) -> bool:
         rows, cols = len(grid), len(grid[0])
-        if rows != 9 and cols != 9: return False
+        if rows != self.N and cols != self.N: return False
 
         for r in range(rows):
             for c in range(cols):
@@ -96,16 +98,27 @@ class Board:
                 self.g[r][c].set_lock(lock)
         return True
 
+    # clear all board cells to zero value
+    def clear_board(self) -> None:
+        zero_grid = [[0 for _ in range(self.N)] for __ in range(self.N)]
+        self.load_board(zero_grid)
+
+    # set all cells with non-zero value to locked
+    def lock_board(self) -> None:
+        for r in range(self.N):
+            for c in range(self.N):
+                if self.g[r][c].get_val():
+                    self.g[r][c].set_lock(True)
+
     # return current board state
     def _print_board(self) -> None:
-        rows, cols = 9, 9
-        self.test = [[None for _ in range(rows)] for __ in range(cols)]
+        self.test = [[None for _ in range(self.N)] for __ in range(self.N)]
 
-        for r in range(rows):
-            for c in range(cols):
+        for r in range(self.N):
+            for c in range(self.N):
                 self.test[r][c] = self.g[r][c].val
 
-        for r in range(rows):
+        for r in range(self.N):
             print (self.test[r])
 
     # return board cell

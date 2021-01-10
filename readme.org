@@ -29,9 +29,9 @@
    message box at bottom of window
    - indicates game completion at end
    - "h" toggles hint printout (immediate check on board validity)
+   - "m" for manual board setup of different puzzles
 
 ** TODO user interface
-   "m" for manual board setup
    "s" to auto-solve the puzzle
 
 * files

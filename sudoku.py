@@ -48,9 +48,9 @@ def main():
     rndr = sd.Render(width, scrn, font_nums, board)
     msg = sd.Msgbox(0, 640, width, 50, scrn, font_msg)
 
-    run, actv = True, False
+    run = True
     i, j = 0, 0
-    hints = False
+    actv, hints, man_mode = False, False, False
     while run:
         # handle input events
         for event in pg.event.get():
@@ -63,23 +63,43 @@ def main():
                     if actv:
                         cell = board.update_cell(i, j, int(key))
                         rndr.update_tile(i, j)
-                        valid, done = board.chk_board()
                         actv = False
-                        if done:
-                            msg.set_txt("Congratulations!")
-                        elif hints:
-                            if not valid:
-                                msg.set_txt("Hint: repeat num found in region!")
-                            else:
-                                msg.set_txt("")
+                        if not man_mode:
+                            valid, done = board.chk_board()
+                            if done:
+                                msg.set_txt("Congratulations!")
+                            elif hints:
+                                if not valid:
+                                    msg.set_txt("Hint: repeat num found in region!")
+                                else:
+                                    msg.set_txt("")
+
+                        board._print_board()
+                        print ("board updated")
                 elif key == "h":
-                    hints = not hints
-                    if hints: msg.set_txt("Hints are now active!")
-                    else: msg.set_txt("Hints have been turned off!")
+                    if not man_mode:
+                        hints = not hints
+                        if hints: msg.set_txt("Hints are now active!")
+                        else: msg.set_txt("Hints have been turned off!")
+                elif key == "m":
+                    if not man_mode:
+                        board.clear_board()
+                        rndr.update_all()
+                        msg.set_txt("Manual mode active! Press 'm' again to finish")
+                        man_mode = True
+                    else:
+                        if not board.chk_board()[0]:
+                            msg.set_txt("Board doesn't look valid!")
+                        else:
+                            board.lock_board()
+                            msg.set_txt("Looks valid, good luck!")
+                            rndr.update_all()
+                            man_mode = False
 
             elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                i, j = rndr.chk_coords(scrn, *event.pos)
-                if (i >= 0 and j >= 0):
+                i1, j1 = rndr.chk_coords(scrn, *event.pos)
+                if (i1 >= 0 and j1 >= 0):
+                    i, j = i1, j1
                     actv = True
 
         clock.tick(30)    # lock framerate to 30 fps
