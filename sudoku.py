@@ -21,20 +21,32 @@ def main():
 
     # init game objects
     clock = pg.time.Clock()
-    font = pg.font.SysFont('notomono', 50)
+    font_nums = pg.font.SysFont('notomono', 50)
+    font_msg = pg.font.SysFont('notomono', 16)
 
     board = sc.Board()
-    if board.load_board( [[0,0,3,7,0,0,0,0,4],
-                          [0,9,0,0,2,8,0,7,0],
-                          [0,0,1,6,0,0,9,0,2],
-                          [0,0,2,3,7,0,0,6,0],
-                          [3,0,8,9,0,2,5,0,7],
-                          [0,7,0,0,8,4,2,0,0],
-                          [2,0,7,0,0,6,4,0,0],
-                          [0,8,0,2,5,0,0,9,0],
-                          [5,0,0,0,0,1,7,0,0]] ):
-        board._print_board()
-    rndr = sd.Render(width, scrn, font, board)
+    board.load_board( [[0,0,3,7,0,0,0,0,4],
+                       [0,9,0,0,2,8,0,7,0],
+                       [0,0,1,6,0,0,9,0,2],
+                       [0,0,2,3,7,0,0,6,0],
+                       [3,0,8,9,0,2,5,0,7],
+                       [0,7,0,0,8,4,2,0,0],
+                       [2,0,7,0,0,6,4,0,0],
+                       [0,8,0,2,5,0,0,9,0],
+                       [5,0,0,0,0,1,7,0,0]] )
+
+#    board.load_board ( [[8, 2, 3, 7, 1, 9, 6, 5, 4],
+#                        [4, 9, 6, 5, 2, 8, 1, 7, 3],
+#                        [7, 5, 1, 6, 4, 3, 9, 8, 2],
+#                        [9, 4, 2, 3, 7, 5, 8, 6, 1],
+#                        [3, 1, 8, 9, 6, 2, 5, 4, 7],
+#                        [6, 7, 5, 1, 8, 4, 2, 3, 9],
+#                        [2, 3, 7, 8, 9, 6, 4, 1, 5],
+#                        [1, 8, 4, 2, 5, 7, 3, 9, 6],
+#                        [5, 6, 9, 4, 3, 1, 7, 2, 0]] )
+
+    rndr = sd.Render(width, scrn, font_nums, board)
+    msg = sd.Msgbox(0, 640, width, 50, scrn, font_msg)
 
     run, actv = True, False
     i, j = 0, 0
@@ -47,18 +59,23 @@ def main():
             elif event.type == pg.KEYDOWN and event.key <= 122:
                 pg.key.set_repeat(0) # disable repeat
                 key = chr(event.key)
-
                 if key.isdigit():
                     if actv:
                         cell = board.update_cell(i, j, int(key))
                         rndr.update_tile(i, j)
-                        #board._print_board()
-                        if hints and not board.chk_board():
-                            print ("Hint: repeat num found in region!")
+                        valid, done = board.chk_board()
                         actv = False
+                        if done:
+                            msg.set_txt("Congratulations!")
+                        elif hints:
+                            if not valid:
+                                msg.set_txt("Hint: repeat num found in region!")
+                            else:
+                                msg.set_txt("")
                 elif key == "h":
                     hints = not hints
-                    print ("Hints active:", hints)
+                    if hints: msg.set_txt("Hints are now active!")
+                    else: msg.set_txt("Hints have been turned off!")
 
             elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 i, j = rndr.chk_coords(scrn, *event.pos)
