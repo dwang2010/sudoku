@@ -1,15 +1,10 @@
 import pygame as pg
 from typing import Tuple
 import sudoku_classes as sc
+import sudoku_const as sconst
 
 # class for rendering individual sudoku tiles
 class Tile:
-    black = pg.Color(0,0,0)
-    white = pg.Color(255,255,255)
-    beige = pg.Color(240,225,190)
-    grey = pg.Color(211,211,211)
-    red = pg.Color(220,20,60)
-
     # create a square, selectable tile for showing current cell number
     def __init__(self, i: int, j: int, x: int, y: int, side: int,
                  bg: pg.Surface, font: pg.font, cell: sc.Cell):
@@ -39,11 +34,11 @@ class Tile:
         lock = self.cell.get_lock()
 
         # configure box / text color
-        bclr = self.beige if slct else self.white
+        bclr = sconst.BEIGE if slct else sconst.WHITE
         if lock:
-            tclr = self.red
+            tclr = sconst.RED
         else:
-            tclr = self.grey if val == 0 else self.black
+            tclr = sconst.GREY if val == 0 else sconst.BLACK
 
         # render text and get coords to center in tile
         txt = self.font.render(str(val), True, tclr)
@@ -103,3 +98,31 @@ class Render:
     # re-render specified tile
     def update_tile(self, i: int, j: int) -> None:
         self.tiles[i][j].update(False)
+
+# class for display box containing messages for the player
+class Msgbox:
+    def __init__(self, x: int, y: int, width: int, height: int,
+                 bg: pg.Surface, font: pg.font):
+        self.s = "Welcome to Sudoku! Press 'h' for active hints as you play."
+        self.coords = (x, y)
+        self.img = pg.Surface((width, height))
+        self.rect = self.img.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.bg = bg
+        self.font = font
+        self.update()
+
+    # update message box text
+    def set_txt(self, s: str) -> None:
+        self.s = s
+        self.update()
+
+    # render text to image and blit onto background
+    def update(self) -> None:
+        txt = self.font.render(self.s, True, sconst.BLACK)
+        txt_rect = txt.get_rect()
+        txt_x = self.rect.width / 2 - txt_rect.width / 2
+        txt_y = self.rect.height / 2 - txt_rect.height / 2
+        self.img.fill(sconst.WHITE)
+        self.img.blit(txt, (txt_x, txt_y))
+        self.bg.blit(self.img, self.coords)
