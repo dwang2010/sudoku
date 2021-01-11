@@ -129,3 +129,39 @@ class Board:
     def update_cell(self, i: int, j: int, val: int) -> Cell:
         self.g[i][j].set_val(val)
         return self.g[i][j]
+
+    # find solution for starting board condition
+    def solve_board(self) -> bool:
+        # clear existing non-locked cells
+        # recursive dfs: try all board combos at each unlocked position
+        # helper function takes index (i, j) returns bool
+        # inserts starting from 1 at specified position
+        # if board valid and recursive step into next step valid, return true
+        # else if either fails, increments current val up to 9
+
+        for i in range(self.N):
+            for j in range(self.N):
+                if not self.g[i][j].get_lock():
+                    self.g[i][j].set_val(0)
+
+        if not self.chk_board()[0]: return False
+
+        def hlpr(i: int, j: int) -> bool:
+            if i == self.N: return True
+
+            cell = self.g[i][j]
+            lock = cell.get_lock()
+
+            ni = i+1 if j == 8 else i
+            nj = (j+1) % 9
+
+            if lock: return hlpr(ni, nj)
+
+            for k in range(1, self.N+1):
+                cell.set_val(k)
+                if self.chk_board()[0] and hlpr(ni, nj):
+                    return True
+                cell.set_val(0)
+            return False
+
+        return hlpr(0,0)

@@ -35,16 +35,6 @@ def main():
                        [0,8,0,2,5,0,0,9,0],
                        [5,0,0,0,0,1,7,0,0]] )
 
-#    board.load_board ( [[8, 2, 3, 7, 1, 9, 6, 5, 4],
-#                        [4, 9, 6, 5, 2, 8, 1, 7, 3],
-#                        [7, 5, 1, 6, 4, 3, 9, 8, 2],
-#                        [9, 4, 2, 3, 7, 5, 8, 6, 1],
-#                        [3, 1, 8, 9, 6, 2, 5, 4, 7],
-#                        [6, 7, 5, 1, 8, 4, 2, 3, 9],
-#                        [2, 3, 7, 8, 9, 6, 4, 1, 5],
-#                        [1, 8, 4, 2, 5, 7, 3, 9, 6],
-#                        [5, 6, 9, 4, 3, 1, 7, 2, 0]] )
-
     rndr = sd.Render(width, scrn, font_nums, board)
     msg = sd.Msgbox(0, 640, width, 50, scrn, font_msg)
 
@@ -73,9 +63,6 @@ def main():
                                     msg.set_txt("Hint: repeat num found in region!")
                                 else:
                                     msg.set_txt("")
-
-                        board._print_board()
-                        print ("board updated")
                 elif key == "h":
                     if not man_mode:
                         hints = not hints
@@ -95,6 +82,15 @@ def main():
                             msg.set_txt("Looks valid, good luck!")
                             rndr.update_all()
                             man_mode = False
+                elif key == "s":
+                    if not man_mode:
+                        print ("Starting solve...")
+                        sol = board.solve_board()
+                        if sol:
+                            rndr.update_all()
+                            msg.set_txt("Board auto-solution found!")
+                        else:
+                            msg.set_txt("Something seems to have broken...")
 
             elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 i1, j1 = rndr.chk_coords(scrn, *event.pos)
@@ -108,6 +104,4 @@ def main():
     pg.quit()
 
 if __name__ == '__main__':
-    print("game start")
     main()
-    print("game end")
